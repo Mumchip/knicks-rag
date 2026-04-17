@@ -29,6 +29,15 @@ class ArgueResponse(BaseModel):
     response: str
 
 
+@app.get("/health")
+def health():
+    try:
+        count = rag._collection.count()
+        return {"status": "ok", "documents": count}
+    except Exception as e:
+        return {"status": "error", "detail": str(e)}
+
+
 @app.get("/")
 def root():
     return FileResponse("frontend/index.html")

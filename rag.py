@@ -14,7 +14,10 @@ load_dotenv()
 claude = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 _chroma = chromadb.PersistentClient(path="./chroma_db")
-_collection = _chroma.get_collection("knicks")
+try:
+    _collection = _chroma.get_collection("knicks")
+except Exception:
+    _collection = _chroma.create_collection("knicks")
 
 NICKNAMES = {
     "kat": "Karl-Anthony Towns",
