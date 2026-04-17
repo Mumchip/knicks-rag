@@ -4,10 +4,9 @@ Run after ingest_current.py. Re-run whenever you want fresh averages.
 """
 import chromadb
 import re
-from sentence_transformers import SentenceTransformer
+from embed_utils import embedder
 
 SEASON = "2025-26"
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
 chroma = chromadb.PersistentClient(path="./chroma_db")
 col = chroma.get_collection("knicks")
 

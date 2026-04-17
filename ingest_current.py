@@ -8,7 +8,7 @@ import time
 import json
 import pandas as pd
 import chromadb
-from sentence_transformers import SentenceTransformer
+from embed_utils import embedder
 from dotenv import load_dotenv
 from nba_api.stats.endpoints import (
     commonteamroster,
@@ -24,7 +24,6 @@ SEASON = "2025-26"
 DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 def load_checkpoint(name):

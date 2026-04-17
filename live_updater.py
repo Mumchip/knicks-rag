@@ -12,7 +12,7 @@ import json
 import pandas as pd
 import chromadb
 from datetime import datetime
-from sentence_transformers import SentenceTransformer
+from embed_utils import embedder
 from dotenv import load_dotenv
 from nba_api.stats.endpoints import (
     teamgamelog,
@@ -28,7 +28,6 @@ SEASON = "2025-26"
 STATE_FILE = "data/live_state.json"
 CHECK_INTERVAL = 30 * 60  # 30 minutes
 
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 def load_state() -> set:

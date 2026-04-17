@@ -1,6 +1,6 @@
 nba_api
 chromadb
-sentence-transformers
+fastembed
 fastapi
 uvicorn[standard]
 python-dotenv

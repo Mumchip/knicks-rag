@@ -6,13 +6,12 @@ import os
 import re
 import chromadb
 import anthropic
-from sentence_transformers import SentenceTransformer
+from embed_utils import embedder
 from dotenv import load_dotenv
 from datetime import date
 
 load_dotenv()
 claude = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 _chroma = chromadb.PersistentClient(path="./chroma_db")
 _collection = _chroma.get_collection("knicks")

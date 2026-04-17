@@ -12,9 +12,8 @@ Steps:
 import json
 import os
 import chromadb
-from sentence_transformers import SentenceTransformer
+from embed_utils import embedder
 
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
 chroma = chromadb.PersistentClient(path="./chroma_db")
 
 # Wipe and recreate

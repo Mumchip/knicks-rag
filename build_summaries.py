@@ -4,7 +4,7 @@ Run after any ingest. Re-run daily to keep current.
 """
 import re
 import chromadb
-from sentence_transformers import SentenceTransformer
+from embed_utils import embedder
 from nba_api.stats.endpoints import (
     leaguedashteamstats,
     leaguedashplayerstats,
@@ -14,7 +14,6 @@ from nba_api.stats.endpoints import (
 
 SEASON = "2025-26"
 KNICKS_ID = 1610612752
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
 chroma = chromadb.PersistentClient(path="./chroma_db")
 col = chroma.get_collection("knicks")
 

@@ -10,7 +10,7 @@ import time
 import json
 import pandas as pd
 import chromadb
-from sentence_transformers import SentenceTransformer
+from embed_utils import embedder
 from dotenv import load_dotenv
 from nba_api.stats.endpoints import (
     franchiseplayers,
@@ -27,7 +27,6 @@ GAME_LOG_SEASONS = 10  # seasons of game-by-game detail
 DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────

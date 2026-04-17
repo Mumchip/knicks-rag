@@ -7,7 +7,7 @@ import os
 import time
 import pandas as pd
 import chromadb
-from sentence_transformers import SentenceTransformer
+from embed_utils import embedder
 from dotenv import load_dotenv
 from nba_api.stats.endpoints import (
     commonteamroster,
@@ -20,7 +20,6 @@ load_dotenv()
 
 KNICKS_ID = 1610612752
 SEASON = "2024-25"
-embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
 
 def get_knicks_roster() -> pd.DataFrame:
