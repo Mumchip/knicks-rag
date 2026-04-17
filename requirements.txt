@@ -1,0 +1,7 @@
+nba_api
+chromadb
+sentence-transformers
+fastapi
+uvicorn[standard]
+python-dotenv
+pandas

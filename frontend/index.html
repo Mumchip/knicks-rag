@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Knicks AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --orange: #F58426;
+      --blue: #006BB6;
+      --black: #000000;
+      --bg: #080808;
+      --surface: #111111;
+      --surface2: #1a1a1a;
+      --border: #222222;
+      --text: #f0f0f0;
+      --muted: #555555;
+      --sidebar-w: 280px;
+    }
+
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
+
+    /* ── Layout ── */
+    .app { display: flex; height: 100vh; }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 2rem 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: radial-gradient(circle, #ffffff08 1px, transparent 1px);
+      background-size: 24px 24px;
+      pointer-events: none;
+    }
+
+    .sidebar::after {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      left: -80px;
+      width: 260px;
+      height: 260px;
+      background: radial-gradient(circle, #F5842620 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .brand { position: relative; z-index: 1; margin-bottom: 2.5rem; }
+
+    .brand-logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 2.2rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .brand-logo span { color: var(--orange); }
+
+    .brand-sub {
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-top: 0.3rem;
+    }
+
+    /* ── Mode toggle ── */
+    .mode-toggle { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
+
+    .mode-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.85rem 1rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-align: left;
+    }
+
+    .mode-btn:hover { border-color: #333; color: var(--text); }
+
+    .mode-btn.active {
+      background: var(--orange);
+      border-color: var(--orange);
+      color: #000;
+    }
+
+    .mode-icon { font-size: 1.1rem; }
+
+    /* ── Sidebar chips ── */
+    .sidebar-section { position: relative; z-index: 1; }
+    .sidebar-section-title { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.6rem; }
+
+    .sidebar-chip {
+      display: block;
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      margin-bottom: 0.4rem;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #aaa;
+      font-size: 0.75rem;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.15s;
+    }
+
+    .sidebar-chip:hover { border-color: var(--orange); color: var(--text); }
+
+    .sidebar-footer {
+      position: relative;
+      z-index: 1;
+      margin-top: auto;
+      font-size: 0.65rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    .sidebar-footer a { color: #444; text-decoration: none; }
+    .sidebar-footer a:hover { color: var(--orange); }
+
+    /* ── Main ── */
+    .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    /* ── Panel ── */
+    .panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+    .panel.active { display: flex; }
+
+    /* ── Chat panel ── */
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      scroll-behavior: smooth;
+    }
+
+    .messages::-webkit-scrollbar { width: 4px; }
+    .messages::-webkit-scrollbar-track { background: transparent; }
+    .messages::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
+    .message { display: flex; flex-direction: column; max-width: 75%; animation: msgIn 0.25s ease; }
+
+    @keyframes msgIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user { align-self: flex-end; }
+    .message.assistant { align-self: flex-start; }
+
+    .message-bubble {
+      padding: 0.85rem 1.1rem;
+      border-radius: 14px;
+      font-size: 0.875rem;
+      line-height: 1.6;
+    }
+
+    .message.user .message-bubble {
+      background: var(--blue);
+      border-radius: 14px 14px 4px 14px;
+    }
+
+    .message.assistant .message-bubble {
+      background: var(--surface2);
+      border-left: 3px solid var(--orange);
+      border-radius: 4px 14px 14px 14px;
+    }
+
+    .message.loading .message-bubble { color: var(--muted); }
+
+    .message-time {
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 0.3rem;
+      padding: 0 0.25rem;
+    }
+
+    .message.user .message-time { text-align: right; }
+
+    /* Typing dots */
+    .typing { display: flex; align-items: center; gap: 4px; padding: 0.5rem 0; }
+    .typing span {
+      width: 6px; height: 6px;
+      background: var(--orange);
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+      30% { transform: translateY(-6px); opacity: 1; }
+    }
+
+    /* ── Chat input ── */
+    .chat-input-area {
+      padding: 1.25rem 2rem;
+      border-top: 1px solid var(--border);
+      background: var(--bg);
+    }
+
+    .chat-form { display: flex; gap: 0.75rem; }
+
+    .chat-input {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.875rem;
+      padding: 0.85rem 1rem;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .chat-input:focus { border-color: var(--orange); }
+    .chat-input::placeholder { color: var(--muted); }
+
+    .chat-send {
+      background: var(--orange);
+      color: #000;
+      border: none;
+      border-radius: 10px;
+      padding: 0.85rem 1.5rem;
+      font-family: 'Inter', sans-serif;
+      font-weight: 600;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .chat-send:hover { opacity: 0.9; transform: scale(1.02); }
+    .chat-send:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    /* ── Argue panel ── */
+    .argue-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+      gap: 2rem;
+      overflow-y: auto;
+    }
+
+    .argue-header { text-align: center; }
+
+    .argue-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 3.5rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      color: var(--text);
+    }
+
+    .argue-title span { color: var(--orange); }
+
+    .argue-subtitle {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-top: 0.5rem;
+    }
+
+    .argue-form { width: 100%; max-width: 600px; display: flex; flex-direction: column; gap: 1rem; }
+
+    .argue-textarea {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 1rem;
+      padding: 1.25rem;
+      outline: none;
+      resize: none;
+      height: 110px;
+      transition: border-color 0.15s;
+    }
+
+    .argue-textarea:focus { border-color: var(--orange); }
+    .argue-textarea::placeholder { color: #333; font-size: 0.95rem; }
+
+    .argue-submit {
+      background: var(--orange);
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      padding: 1rem;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .argue-submit:hover { opacity: 0.9; transform: scale(1.01); }
+    .argue-submit:disabled { opacity: 0.3; cursor: not-allowed; transform: none; }
+
+    .argue-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 600px; }
+
+    .argue-chip {
+      padding: 0.45rem 0.85rem;
+      border: 1px solid #333;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      color: #888;
+      cursor: pointer;
+      transition: all 0.15s;
+      background: transparent;
+    }
+
+    .argue-chip:hover { border-color: var(--orange); color: var(--text); }
+
+    .argue-response {
+      width: 100%;
+      max-width: 600px;
+      background: var(--surface);
+      border: 1px solid var(--orange);
+      border-radius: 16px;
+      padding: 1.5rem;
+      box-shadow: 0 0 30px #F5842618;
+      animation: slideUp 0.35s ease;
+      display: none;
+    }
+
+    .argue-response.visible { display: block; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .argue-response-header {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--orange);
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .argue-response-text {
+      font-size: 0.9rem;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+
+    /* ── Empty state chips in chat ── */
+    .empty-state {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    .empty-icon {
+      font-size: 3rem;
+      filter: grayscale(0.3);
+    }
+
+    .empty-title {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .empty-sub { font-size: 0.8rem; color: var(--muted); }
+
+    .empty-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; justify-content: center; max-width: 500px; }
+
+    .empty-chip {
+      padding: 0.55rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      color: #888;
+      cursor: pointer;
+      background: var(--surface2);
+      transition: all 0.15s;
+    }
+
+    .empty-chip:hover { border-color: var(--orange); color: var(--text); }
+
+    /* ── Markdown ── */
+    .message-bubble strong { color: var(--orange); font-weight: 600; }
+    .message-bubble ul { padding-left: 1.2rem; margin: 0.4rem 0; }
+    .message-bubble li { margin: 0.2rem 0; }
+
+    /* ── Mobile ── */
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .app { flex-direction: column; }
+      .messages { padding: 1rem; }
+      .chat-input-area { padding: 1rem; }
+      .argue-panel { padding: 1.5rem 1rem; }
+      .argue-title { font-size: 2.5rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-logo">KNICKS<span>AI</span></div>
+      <div class="brand-sub">Your Knicks. Every stat. All time.</div>
+    </div>
+
+    <div class="mode-toggle">
+      <button class="mode-btn active" data-mode="chat">
+        <span class="mode-icon">💬</span> Ask
+      </button>
+      <button class="mode-btn" data-mode="argue">
+        <span class="mode-icon">🔥</span> Argue
+      </button>
+    </div>
+
+    <div class="sidebar-section" id="sidebar-chat-hints">
+      <div class="sidebar-section-title">Suggested questions</div>
+      <button class="sidebar-chip" data-q="Who leads the team in scoring this season?">Who leads in scoring?</button>
+      <button class="sidebar-chip" data-q="How did the Knicks do in the 1970 season?">The 1970 championship season</button>
+      <button class="sidebar-chip" data-q="What are Jalen Brunson's stats this season?">Brunson's stats this season</button>
+      <button class="sidebar-chip" data-q="What is the Knicks' record this season?">Current season record</button>
+    </div>
+
+    <div class="sidebar-section" id="sidebar-argue-hints" style="display:none">
+      <div class="sidebar-section-title">Popular takes</div>
+      <button class="sidebar-chip" data-take="Brunson is overrated">Brunson is overrated</button>
+      <button class="sidebar-chip" data-take="The Knicks will never win a championship">Knicks will never win</button>
+      <button class="sidebar-chip" data-take="KAT is soft">KAT is soft</button>
+      <button class="sidebar-chip" data-take="Mikal Bridges was a bad trade">Bridges was a bad trade</button>
+    </div>
+
+    <div class="sidebar-footer">
+      Built by Mohammad Elhafdaoui<br>
+      <a href="https://github.com/mumchip" target="_blank">github.com/mumchip</a><br><br>
+      Claude AI · NBA API · Live Data
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- Chat Panel -->
+    <div class="panel active" id="chat-panel">
+      <div class="messages" id="messages">
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">🏀</div>
+          <div class="empty-title">Know the Knicks inside out</div>
+          <div class="empty-sub">Full franchise history · Live 2025-26 stats · Every player since 1946</div>
+          <div class="empty-chips">
+            <button class="empty-chip" data-q="Who leads the team in scoring?">Who leads in scoring?</button>
+            <button class="empty-chip" data-q="When did the Knicks win their championships?">Championship history</button>
+            <button class="empty-chip" data-q="What are Brunson's stats this season?">Brunson's stats</button>
+            <button class="empty-chip" data-q="How has KAT been playing lately?">How's KAT playing?</button>
+            <button class="empty-chip" data-q="What is the Knicks' record this season?">Current record</button>
+          </div>
+        </div>
+      </div>
+      <div class="chat-input-area">
+        <form class="chat-form" id="chat-form">
+          <input class="chat-input" id="chat-input" type="text" placeholder="Stats, history, players, records..." autocomplete="off" />
+          <button class="chat-send" type="submit">Send</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Argue Panel -->
+    <div class="panel" id="argue-panel">
+      <div class="argue-panel" id="argue-content">
+        <div class="argue-header">
+          <div class="argue-title">THINK YOU<br><span>GOT ONE?</span></div>
+          <div class="argue-subtitle">Say something about the Knicks. We'll settle it with stats.</div>
+        </div>
+
+        <form class="argue-form" id="argue-form">
+          <textarea class="argue-textarea" id="argue-input" placeholder="Brunson is overrated..." rows="4"></textarea>
+          <button class="argue-submit" type="submit">🔥 FIGHT ME</button>
+        </form>
+
+        <div class="argue-chips">
+          <button class="argue-chip" data-take="Brunson is overrated">Brunson is overrated</button>
+          <button class="argue-chip" data-take="The Knicks will never win a championship">Knicks will never win</button>
+          <button class="argue-chip" data-take="KAT is soft">KAT is soft</button>
+          <button class="argue-chip" data-take="Mikal Bridges was a bad trade">Bridges was a bad trade</button>
+          <button class="argue-chip" data-take="The Knicks don't have what it takes to beat the Celtics">Can't beat the Celtics</button>
+        </div>
+
+        <div class="argue-response" id="argue-response">
+          <div class="argue-response-header">🏀 CASE CLOSED</div>
+          <div class="argue-response-text" id="argue-response-text"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // ── Mode switching ──
+  const modeBtns = document.querySelectorAll('.mode-btn');
+  const panels = document.querySelectorAll('.panel');
+  const sidebarChatHints = document.getElementById('sidebar-chat-hints');
+  const sidebarArgueHints = document.getElementById('sidebar-argue-hints');
+
+  modeBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.mode;
+      modeBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      panels.forEach(p => p.classList.remove('active'));
+      document.getElementById(mode + '-panel').classList.add('active');
+      sidebarChatHints.style.display = mode === 'chat' ? '' : 'none';
+      sidebarArgueHints.style.display = mode === 'argue' ? '' : 'none';
+    });
+  });
+
+  // ── Chat ──
+  const messagesEl = document.getElementById('messages');
+  const emptyState = document.getElementById('empty-state');
+  const chatForm = document.getElementById('chat-form');
+  const chatInput = document.getElementById('chat-input');
+  const chatSend = chatForm.querySelector('button');
+
+  function now() {
+    return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function renderMarkdown(text) {
+    return text
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+      .replace(/\n/g, '<br>');
+  }
+
+  function addMessage(content, role) {
+    if (emptyState) emptyState.remove();
+    const wrap = document.createElement('div');
+    wrap.className = `message ${role}`;
+    const bubble = document.createElement('div');
+    bubble.className = 'message-bubble';
+    if (role === 'loading') {
+      bubble.innerHTML = '<div class="typing"><span></span><span></span><span></span></div>';
+    } else {
+      bubble.innerHTML = renderMarkdown(content);
+    }
+    const time = document.createElement('div');
+    time.className = 'message-time';
+    time.textContent = now();
+    wrap.appendChild(bubble);
+    wrap.appendChild(time);
+    messagesEl.appendChild(wrap);
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    return { wrap, bubble };
+  }
+
+  async function sendChat(question) {
+    if (!question.trim()) return;
+    addMessage(question, 'user');
+    chatInput.value = '';
+    chatSend.disabled = true;
+    const { wrap, bubble } = addMessage('', 'loading');
+    try {
+      const res = await fetch('/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question })
+      });
+      const data = await res.json();
+      wrap.classList.remove('loading');
+      bubble.innerHTML = renderMarkdown(data.answer);
+    } catch {
+      bubble.innerHTML = 'Something went wrong. Is the server running?';
+      wrap.classList.remove('loading');
+    } finally {
+      chatSend.disabled = false;
+      chatInput.focus();
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+  }
+
+  chatForm.addEventListener('submit', e => { e.preventDefault(); sendChat(chatInput.value); });
+
+  // Chips — empty state
+  document.addEventListener('click', e => {
+    const chip = e.target.closest('[data-q]');
+    if (chip) sendChat(chip.dataset.q);
+  });
+
+  // Sidebar chat chips
+  document.querySelectorAll('.sidebar-chip[data-q]').forEach(chip => {
+    chip.addEventListener('click', () => sendChat(chip.dataset.q));
+  });
+
+  // ── Argue ──
+  const argueForm = document.getElementById('argue-form');
+  const argueInput = document.getElementById('argue-input');
+  const argueSubmit = argueForm.querySelector('button');
+  const argueResponse = document.getElementById('argue-response');
+  const argueResponseText = document.getElementById('argue-response-text');
+
+  async function sendArgue(take) {
+    if (!take.trim()) return;
+    argueInput.value = take;
+    argueSubmit.disabled = true;
+    argueSubmit.textContent = '⏳ LOADING...';
+    argueResponse.classList.remove('visible');
+    try {
+      const res = await fetch('/argue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ take })
+      });
+      const data = await res.json();
+      argueResponseText.textContent = data.response;
+      argueResponse.classList.add('visible');
+      argueResponse.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } catch {
+      argueResponseText.textContent = 'Something went wrong. Is the server running?';
+      argueResponse.classList.add('visible');
+    } finally {
+      argueSubmit.disabled = false;
+      argueSubmit.textContent = '🔥 FIGHT ME';
+    }
+  }
+
+  argueForm.addEventListener('submit', e => { e.preventDefault(); sendArgue(argueInput.value); });
+
+  document.querySelectorAll('.argue-chip, .sidebar-chip[data-take]').forEach(chip => {
+    chip.addEventListener('click', () => sendArgue(chip.dataset.take));
+  });
+</script>
+</body>
+</html>

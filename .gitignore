@@ -1,0 +1,8 @@
+.env
+__pycache__/
+*.pyc
+chroma_db/
+*.egg-info/
+.venv/
+venv/
+data/historical_db.json
