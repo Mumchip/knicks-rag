@@ -1,3 +1,4 @@
+from db_path import CHROMA_PATH
 """
 ingest_full.py — Full Knicks history: all seasons, all players, recent game logs.
 Run once (takes 15-25 min due to NBA API rate limits): python ingest_full.py
@@ -176,7 +177,7 @@ def store_all(docs: list[dict]):
     texts = [d["text"] for d in docs]
     embeddings = embedder.encode(texts, batch_size=64, show_progress_bar=True)
 
-    chroma = chromadb.PersistentClient(path="./chroma_db")
+    chroma = chromadb.PersistentClient(path=CHROMA_PATH)
     try:
         chroma.delete_collection("knicks")
     except Exception:

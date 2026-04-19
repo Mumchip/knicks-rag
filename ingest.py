@@ -1,3 +1,4 @@
+from db_path import CHROMA_PATH
 """
 ingest.py — Pull Knicks data from NBA API, embed with local model, store in Chroma.
 Run once to build the vector DB: python ingest.py
@@ -114,7 +115,7 @@ def store_in_chroma(docs: list[dict]):
     texts = [d["text"] for d in docs]
     embeddings = embedder.encode(texts, show_progress_bar=True).tolist()
 
-    chroma = chromadb.PersistentClient(path="./chroma_db")
+    chroma = chromadb.PersistentClient(path=CHROMA_PATH)
     try:
         chroma.delete_collection("knicks")
     except Exception:

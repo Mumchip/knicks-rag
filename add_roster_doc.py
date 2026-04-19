@@ -1,3 +1,4 @@
+from db_path import CHROMA_PATH
 """
 add_roster_doc.py — Adds a single roster summary document to Chroma.
 Re-run whenever the roster changes.
@@ -17,7 +18,7 @@ doc = f"The 2025-26 New York Knicks roster includes the following players: {', '
 print(doc)
 
 embedding = embedder.encode(doc)
-chroma = chromadb.PersistentClient(path="./chroma_db")
+chroma = chromadb.PersistentClient(path=CHROMA_PATH)
 col = chroma.get_collection("knicks")
 col.upsert(ids=["roster_2025-26"], documents=[doc], embeddings=[embedding])
 print("Done.")

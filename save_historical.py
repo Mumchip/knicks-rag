@@ -1,3 +1,4 @@
+from db_path import CHROMA_PATH
 """
 save_historical.py — Export all historical docs from Chroma to a permanent JSON backup.
 Run once. After this, historical data never needs to be re-fetched from the NBA API.
@@ -9,7 +10,7 @@ import chromadb
 CURRENT_SEASON = "2025-26"
 BACKUP_FILE = "data/historical_db.json"
 
-chroma = chromadb.PersistentClient(path="./chroma_db")
+chroma = chromadb.PersistentClient(path=CHROMA_PATH)
 col = chroma.get_collection("knicks")
 
 print("Reading all documents from Chroma...")

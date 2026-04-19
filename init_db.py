@@ -1,9 +1,10 @@
+from db_path import CHROMA_PATH
 """
 init_db.py — Run on deploy. Builds the DB if empty, skips if already populated.
 """
 import chromadb
 
-chroma = chromadb.PersistentClient(path="./chroma_db")
+chroma = chromadb.PersistentClient(path=CHROMA_PATH)
 try:
     col = chroma.get_collection("knicks")
     count = col.count()

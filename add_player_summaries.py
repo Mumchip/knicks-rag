@@ -1,3 +1,4 @@
+from db_path import CHROMA_PATH
 """
 add_player_summaries.py — Compute 2025-26 season averages per player and store as summary docs.
 Run after ingest_current.py. Re-run whenever you want fresh averages.
@@ -7,7 +8,7 @@ import re
 from embed_utils import embedder
 
 SEASON = "2025-26"
-chroma = chromadb.PersistentClient(path="./chroma_db")
+chroma = chromadb.PersistentClient(path=CHROMA_PATH)
 col = chroma.get_collection("knicks")
 
 # Pull all player game log docs for current season

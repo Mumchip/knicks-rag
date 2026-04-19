@@ -1,3 +1,4 @@
+from db_path import CHROMA_PATH
 """
 ingest_current.py — Current season deep data: player game logs + box scores.
 Run once to add to existing chroma_db: python ingest_current.py
@@ -150,7 +151,7 @@ def upsert_to_chroma(docs: list[dict]):
     texts = [d["text"] for d in docs]
     embeddings = embedder.encode(texts, batch_size=64, show_progress_bar=True)
 
-    chroma = chromadb.PersistentClient(path="./chroma_db")
+    chroma = chromadb.PersistentClient(path=CHROMA_PATH)
     collection = chroma.get_collection("knicks")
 
     # Upsert in batches (add new, update existing)

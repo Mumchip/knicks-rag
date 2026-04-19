@@ -32,7 +32,7 @@ class ArgueResponse(BaseModel):
 @app.get("/health")
 def health():
     try:
-        count = rag._collection.count()
+        count = rag._get_collection().count()
         return {"status": "ok", "documents": count}
     except Exception as e:
         return {"status": "error", "detail": str(e)}

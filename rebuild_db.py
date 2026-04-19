@@ -1,3 +1,4 @@
+from db_path import CHROMA_PATH
 """
 rebuild_db.py — Rebuild Chroma from scratch using locked historical data + fresh current season.
 Use this if chroma_db ever gets corrupted or you need to start fresh.
@@ -14,7 +15,7 @@ import os
 import chromadb
 from embed_utils import embedder
 
-chroma = chromadb.PersistentClient(path="./chroma_db")
+chroma = chromadb.PersistentClient(path=CHROMA_PATH)
 
 # Wipe and recreate
 try:

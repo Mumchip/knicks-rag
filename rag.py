@@ -1,3 +1,4 @@
+from db_path import CHROMA_PATH
 """
 rag.py — Retrieval + generation logic.
 """
@@ -32,7 +33,7 @@ def _get_embedder():
 def _get_collection():
     global _chroma, _collection
     if _collection is None:
-        _chroma = chromadb.PersistentClient(path="./chroma_db")
+        _chroma = chromadb.PersistentClient(path=CHROMA_PATH)
         try:
             _collection = _chroma.get_collection("knicks")
         except Exception:

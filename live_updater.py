@@ -1,3 +1,4 @@
+from db_path import CHROMA_PATH
 """
 live_updater.py — Polls for new Knicks games and updates Chroma automatically.
 Run alongside the server: python live_updater.py
@@ -127,7 +128,7 @@ def upsert(docs: list[dict]):
         return
     texts = [d["text"] for d in docs]
     embeddings = embedder.encode(texts, batch_size=64)
-    chroma = chromadb.PersistentClient(path="./chroma_db")
+    chroma = chromadb.PersistentClient(path=CHROMA_PATH)
     collection = chroma.get_collection("knicks")
     collection.upsert(
         ids=[d["id"] for d in docs],

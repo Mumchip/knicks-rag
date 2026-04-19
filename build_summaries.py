@@ -1,3 +1,4 @@
+from db_path import CHROMA_PATH
 """
 build_summaries.py — Pre-compute all summary documents for reliable retrieval.
 Run after any ingest. Re-run daily to keep current.
@@ -14,7 +15,7 @@ from nba_api.stats.endpoints import (
 
 SEASON = "2025-26"
 KNICKS_ID = 1610612752
-chroma = chromadb.PersistentClient(path="./chroma_db")
+chroma = chromadb.PersistentClient(path=CHROMA_PATH)
 col = chroma.get_collection("knicks")
 
 docs = {}

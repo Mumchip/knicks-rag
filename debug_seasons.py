@@ -1,6 +1,7 @@
+from db_path import CHROMA_PATH
 import chromadb
 
-chroma = chromadb.PersistentClient(path="./chroma_db")
+chroma = chromadb.PersistentClient(path=CHROMA_PATH)
 col = chroma.get_collection("knicks")
 
 # Get all docs and filter for season summaries

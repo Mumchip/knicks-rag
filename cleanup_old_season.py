@@ -1,10 +1,11 @@
+from db_path import CHROMA_PATH
 """
 cleanup_old_season.py — Remove old season player game logs and box scores from Chroma.
 Run once to clean up 2024-25 docs before re-ingesting 2025-26.
 """
 import chromadb
 
-chroma = chromadb.PersistentClient(path="./chroma_db")
+chroma = chromadb.PersistentClient(path=CHROMA_PATH)
 col = chroma.get_collection("knicks")
 
 all_ids = col.get(limit=10000)["ids"]
