@@ -41,7 +41,7 @@ except Exception as e:
 print("Building player averages from NBA API...")
 try:
     players_df = leaguedashplayerstats.LeagueDashPlayerStats(
-        season=SEASON, per_mode_simple="PerGame"
+        season=SEASON, per_mode_detailed="PerGame"
     ).get_data_frames()[0]
 
     # Get Knicks roster to filter
@@ -75,7 +75,7 @@ except Exception as e:
 print("Building statistical leaders...")
 try:
     players_df = leaguedashplayerstats.LeagueDashPlayerStats(
-        season=SEASON, per_mode_simple="PerGame"
+        season=SEASON, per_mode_detailed="PerGame"
     ).get_data_frames()[0]
     roster = commonteamroster.CommonTeamRoster(team_id=KNICKS_ID, season=SEASON).get_data_frames()[0]
     knicks_ids = set(roster["PLAYER_ID"].tolist())
