@@ -16,7 +16,7 @@ players = roster["PLAYER"].tolist()
 doc = f"The 2025-26 New York Knicks roster includes the following players: {', '.join(players)}."
 print(doc)
 
-embedding = embedder.encode(doc).tolist()
+embedding = embedder.encode(doc)
 chroma = chromadb.PersistentClient(path="./chroma_db")
 col = chroma.get_collection("knicks")
 col.upsert(ids=["roster_2025-26"], documents=[doc], embeddings=[embedding])

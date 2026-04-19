@@ -62,7 +62,7 @@ for name, stats in player_games.items():
 
 if docs:
     texts = [d["text"] for d in docs]
-    embeddings = embedder.encode(texts, show_progress_bar=False).tolist()
+    embeddings = embedder.encode(texts, show_progress_bar=False)
     col.upsert(ids=[d["id"] for d in docs], documents=texts, embeddings=embeddings)
     print(f"\nStored {len(docs)} player summary docs.")
 else:

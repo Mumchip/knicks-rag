@@ -174,7 +174,7 @@ def fetch_player_stats() -> list[dict]:
 def store_all(docs: list[dict]):
     print(f"\nEmbedding {len(docs)} documents...")
     texts = [d["text"] for d in docs]
-    embeddings = embedder.encode(texts, batch_size=64, show_progress_bar=True).tolist()
+    embeddings = embedder.encode(texts, batch_size=64, show_progress_bar=True)
 
     chroma = chromadb.PersistentClient(path="./chroma_db")
     try:

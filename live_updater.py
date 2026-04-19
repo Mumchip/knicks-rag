@@ -126,7 +126,7 @@ def upsert(docs: list[dict]):
     if not docs:
         return
     texts = [d["text"] for d in docs]
-    embeddings = embedder.encode(texts, batch_size=64).tolist()
+    embeddings = embedder.encode(texts, batch_size=64)
     chroma = chromadb.PersistentClient(path="./chroma_db")
     collection = chroma.get_collection("knicks")
     collection.upsert(

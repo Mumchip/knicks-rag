@@ -128,7 +128,7 @@ except Exception as e:
 print(f"\nUpserting {len(docs)} summary documents...")
 ids = list(docs.keys())
 texts = list(docs.values())
-embeddings = embedder.encode(texts, show_progress_bar=True).tolist()
+embeddings = embedder.encode(texts, show_progress_bar=True)
 col.upsert(ids=ids, documents=texts, embeddings=embeddings)
 print(f"Done. {len(docs)} summary docs stored.")
 print("\nSummary docs created:")

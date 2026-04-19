@@ -277,7 +277,7 @@ def _retrieve(query: str, n_results: int) -> str:
     processed = _preprocess_query(query)
     direct_season = _direct_season_lookup(query)
     direct_summary = _direct_summary_lookup(query)
-    embedding = _get_embedder().encode(processed).tolist()
+    embedding = _get_embedder().encode(processed)
     results = _get_collection().query(
         query_embeddings=[embedding],
         n_results=n_results

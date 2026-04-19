@@ -148,7 +148,7 @@ def fetch_box_scores() -> list[dict]:
 def upsert_to_chroma(docs: list[dict]):
     print(f"\nEmbedding {len(docs)} documents...")
     texts = [d["text"] for d in docs]
-    embeddings = embedder.encode(texts, batch_size=64, show_progress_bar=True).tolist()
+    embeddings = embedder.encode(texts, batch_size=64, show_progress_bar=True)
 
     chroma = chromadb.PersistentClient(path="./chroma_db")
     collection = chroma.get_collection("knicks")

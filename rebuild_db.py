@@ -49,7 +49,7 @@ for cache_file in ["data/player_game_logs_2025.json", "data/box_scores_2025.json
 if current_docs:
     print(f"Embedding {len(current_docs)} current season documents...")
     texts = [d["text"] for d in current_docs]
-    embeddings = embedder.encode(texts, batch_size=64, show_progress_bar=True).tolist()
+    embeddings = embedder.encode(texts, batch_size=64, show_progress_bar=True)
     for i in range(0, len(current_docs), batch_size):
         col.upsert(
             ids=[d["id"] for d in current_docs[i:i+batch_size]],
