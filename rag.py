@@ -6,18 +6,38 @@ import os
 import re
 import chromadb
 import anthropic
-from embed_utils import embedder
 from dotenv import load_dotenv
 from datetime import date
 
 load_dotenv()
-claude = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-_chroma = chromadb.PersistentClient(path="./chroma_db")
-try:
-    _collection = _chroma.get_collection("knicks")
-except Exception:
-    _collection = _chroma.create_collection("knicks")
+_claude = None
+_embedder = None
+_chroma = None
+_collection = None
+
+def _get_claude():
+    global _claude
+    if _claude is None:
+        _claude = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    return _claude
+
+def _get_embedder():
+    global _embedder
+    if _embedder is None:
+        from embed_utils import embedder as _e
+        _embedder = _e
+    return _embedder
+
+def _get_collection():
+    global _chroma, _collection
+    if _collection is None:
+        _chroma = chromadb.PersistentClient(path="./chroma_db")
+        try:
+            _collection = _chroma.get_collection("knicks")
+        except Exception:
+            _collection = _chroma.create_collection("knicks")
+    return _collection
 
 NICKNAMES = {
     "kat": "Karl-Anthony Towns",
@@ -172,7 +192,7 @@ def _direct_season_lookup(query: str) -> list[str]:
     for y in set(int(x) for x in years):
         for season_id in [f"season_{y-1}-{str(y)[-2:]}", f"season_{y}-{str(y+1)[-2:]}"]:
             try:
-                result = _collection.get(ids=[season_id])
+                result = _get_collection().get(ids=[season_id])
                 if result["documents"]:
                     docs.extend(result["documents"])
             except Exception:
@@ -190,7 +210,7 @@ def _direct_summary_lookup(query: str) -> list[str]:
     if any(t in q for t in record_triggers):
         for doc_id in ["summary_current_season", "summary_recent_form"]:
             try:
-                r = _collection.get(ids=[doc_id])
+                r = _get_collection().get(ids=[doc_id])
                 if r["documents"]: docs.extend(r["documents"])
             except Exception: pass
 
@@ -198,28 +218,28 @@ def _direct_summary_lookup(query: str) -> list[str]:
     if any(t in q for t in ["scoring leader", "most points", "top scorer", "who scores",
                              "leads in scoring", "leading scorer", "highest ppg"]):
         try:
-            r = _collection.get(ids=["summary_scoring_leaders"])
+            r = _get_collection().get(ids=["summary_scoring_leaders"])
             if r["documents"]: docs.extend(r["documents"])
         except Exception: pass
 
     # Assist leaders
     if any(t in q for t in ["assist leader", "most assists", "who dishes", "leads in assists"]):
         try:
-            r = _collection.get(ids=["summary_assist_leaders"])
+            r = _get_collection().get(ids=["summary_assist_leaders"])
             if r["documents"]: docs.extend(r["documents"])
         except Exception: pass
 
     # Rebound leaders
     if any(t in q for t in ["rebound leader", "most rebounds", "who rebounds", "leads in rebounds"]):
         try:
-            r = _collection.get(ids=["summary_rebound_leaders"])
+            r = _get_collection().get(ids=["summary_rebound_leaders"])
             if r["documents"]: docs.extend(r["documents"])
         except Exception: pass
 
     # Recent form
     if any(t in q for t in ["last 10", "recent", "lately", "last few games", "form", "streak"]):
         try:
-            r = _collection.get(ids=["summary_recent_form"])
+            r = _get_collection().get(ids=["summary_recent_form"])
             if r["documents"]: docs.extend(r["documents"])
         except Exception: pass
 
@@ -227,7 +247,7 @@ def _direct_summary_lookup(query: str) -> list[str]:
     if any(t in q for t in ["roster", "who's on", "who is on", "list the players",
                              "current players", "squad", "lineup"]):
         try:
-            r = _collection.get(ids=["roster_2025-26"])
+            r = _get_collection().get(ids=["roster_2025-26"])
             if r["documents"]: docs.extend(r["documents"])
         except Exception: pass
 
@@ -246,7 +266,7 @@ def _direct_summary_lookup(query: str) -> list[str]:
     }.items():
         if any(v in q for v in variants):
             try:
-                r = _collection.get(ids=[f"summary_player_{name}"])
+                r = _get_collection().get(ids=[f"summary_player_{name}"])
                 if r["documents"]: docs.extend(r["documents"])
             except Exception: pass
 
@@ -257,8 +277,8 @@ def _retrieve(query: str, n_results: int) -> str:
     processed = _preprocess_query(query)
     direct_season = _direct_season_lookup(query)
     direct_summary = _direct_summary_lookup(query)
-    embedding = embedder.encode(processed).tolist()
-    results = _collection.query(
+    embedding = _get_embedder().encode(processed).tolist()
+    results = _get_collection().query(
         query_embeddings=[embedding],
         n_results=n_results
     )
@@ -270,7 +290,7 @@ def _retrieve(query: str, n_results: int) -> str:
 
 def answer(question: str) -> str:
     context = _retrieve(question, n_results=10)
-    message = claude.messages.create(
+    message = _get_claude().messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=600,
         system=_chat_system(),
@@ -284,7 +304,7 @@ def answer(question: str) -> str:
 
 def argue(take: str) -> str:
     context = _retrieve(take, n_results=10)
-    message = claude.messages.create(
+    message = _get_claude().messages.create(
         model="claude-haiku-4-5-20251001",
         max_tokens=300,
         system=ARGUE_SYSTEM,
