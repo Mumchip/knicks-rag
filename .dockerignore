@@ -1,0 +1,12 @@
+fly.toml
+.git/
+__pycache__/
+.envrc
+.venv/
+venv/
+chroma_db/
+data/
+*.pyc
+.env
+*.log
+*.egg-info/
